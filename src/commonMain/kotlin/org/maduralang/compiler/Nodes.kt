@@ -10,12 +10,12 @@ data class Module(val defs: List<Node>) : Node {
 data class Function(
     val name: Token,
     val params: List<Node>,
-    val type: Token = Token(NAME, "None"),
-    val body: List<Node>) :
-    Node {
+    val type: Token?,
+    val body: List<Node>
+) : Node {
 
     override fun toString(): String {
-        return "{\"name\": \"$name\", \"params\": $params, \"type\": \"$type\", \"body\": $body}"
+        return "{\"name\": \"$name\", \"params\": $params, \"type\": \"${type ?: "None"}\", \"body\": $body}"
     }
 }
 
@@ -31,4 +31,9 @@ data class Call(val name: Token, val args: List<Node>) : Node {
     override fun toString(): String {
         return "{\"name\": \"$name\", \"args\": $args}"
     }
+}
+
+data class Constant(val token: Token):Node {
+
+    override fun toString(): String = token.data
 }

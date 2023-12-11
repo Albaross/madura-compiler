@@ -9,7 +9,7 @@ const val COMMENT = 7
 const val META = 8
 const val INVALID = 9
 
-class Token(val type: Int, val data: String) {
+data class Token(val type: Int, val data: String) {
 
     override fun toString(): String = data
 }

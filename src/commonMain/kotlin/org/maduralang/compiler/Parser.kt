@@ -1,148 +1,153 @@
-let Parser = (function () {
+class Parser() {
 
-	function parse(tokenList) {
-		return readModule(new Tokens(tokenList));
-	}
+    fun parse(tokenList: List<Token>): Node {
+        return readModule(Tokens(tokenList));
+    }
 
-	function readModule(tokens) {
-		let defs = [];
+    fun readModule(tokens: Tokens): Module {
+        val defs = ArrayList<Node>();
 
-		while (tokens.hasNext()) {
-			let t = tokens.next();
-			switch (t.type) {
-				case KEYWORD: defs.push(readDefinition(t, tokens));
-				case LINEBREAK:
-				case COMMENT:
-				case META: break;
-				default: throw new Error('syntax error', t);
-			}
-		}
+        while (tokens.hasNext()) {
+            var t = tokens.next();
+            when (t.type) {
+                KEYWORD -> defs.add(readDefinition(t, tokens));
+                LINEBREAK,
+                COMMENT,
+                META -> break;
+                else -> throw Error("syntax error", t);
+            }
+        }
 
-		return new Module(defs);
-	}
+        return Module(defs);
+    }
 
-	function readDefinition(t, tokens) {
-		switch(t.data) {
-			case 'fun': return readFunction(t, tokens);
-			case 'let':
-			case 'class':
-			case 'public':
-			case 'private':
-			case 'protected': throw new Error('not yet implemented', t);
-			default: throw new Error('syntax arror', t);
-		}
-	}
+    fun readDefinition(t: Token, tokens: Tokens): Node {
+        when (t.data) {
+            "fun" -> return readFunction(t, tokens);
+            "var",
+            "class",
+            "public",
+            "private",
+            "protected" -> throw Error("not yet implemented", t);
+            else -> throw Error("syntax arror", t);
+        }
+    }
 
-	function readFunction(t, tokens) {
-		let name = matchType(tokens.next(), NAME);
-		match(tokens.next(), '(');
-		let params = collect(tokens, readParameter, ')', ',');
-		t = tokens.next();
-		let type;
-		
-		if (t.data === ':') {
-			type = readType(tokens);
-			t = tokens.next();
-		}
+    fun readFunction(token: Token, tokens: Tokens): Function {
+        var name = matchType(tokens.next(), NAME);
+        match(tokens.next(), "(");
+        var params = collect(tokens, ::readParameter, ")", ",");
+        var t = tokens.next();
+        var type: Token? = null;
 
-		let body;
-		switch (t.data) {
-			case '{': body = collect(tokens, readStatement, '}', '\n'); break;
-			case '=>': body = [readStatement(tokens.next(), tokens)]; break;
-		}
+        if (t.data === ":") {
+            type = readType(tokens);
+            t = tokens.next();
+        }
 
-		return new Function(name, params, type, body);
-	}
+        var body = emptyList<Node>();
+        when (t.data) {
+            "{" -> body = collect(tokens, ::readStatement, "}", "\n");
+            "=>" -> body = listOf(readStatement(tokens.next(), tokens));
+        }
 
-	function readParameter(t, tokens) {
-		let name = matchType(t, NAME);
-		match(tokens.next(), ':');
-		let type = readType(tokens);
-		return new Parameter(name, type);
-	}
+        return Function(name, params, type, body);
+    }
 
-	function readType(tokens) {
-		return matchType(tokens.next(), NAME);
-	}
+    fun readParameter(t: Token, tokens: Tokens): Parameter {
+        var name = matchType(t, NAME);
+        match(tokens.next(), ":");
+        var type = readType(tokens);
+        return Parameter(name, type);
+    }
 
-	function readStatement(t, tokens) {
-		if (t.type === NAME) {
-			return readCall(t, tokens);
-		}
-		throw new Error('syntax error', t);
-	}
+    fun readType(tokens: Tokens): Token {
+        return matchType(tokens.next(), NAME);
+    }
 
-	function readExpression(t, tokens) {
-		switch (t.type) {
-			case NUMBER:
-			case STRING: return t;
-			case NAME: return readCall(t, tokens);
-		}
-		throw new Error('systax error', t);
-	}
+    fun readStatement(t: Token, tokens: Tokens): Node {
+        if (t.type === NAME) {
+            return readCall(t, tokens);
+        }
+        throw Error("syntax error", t);
+    }
 
-	function readCall(t, tokens) {
-		let name = t;
-		match(tokens.next(), '(');
-		let args = collect(tokens, readExpression, ')', ',');
-		return new Call(name, args);
-	}
+    fun readExpression(t: Token, tokens: Tokens): Node {
+        when (t.type) {
+            NUMBER,
+            STRING -> return Constant(t);
+            NAME -> return readCall(t, tokens);
+        }
+        throw Error("systax error", t);
+    }
 
-	function collect(tokens, read, delimiter, separator) {
-		let list = [];
-		let counter = 0;
+    fun readCall(t: Token, tokens: Tokens): Call {
+        var name = t;
+        match(tokens.next(), "(");
+        var args = collect(tokens, ::readExpression, ")", ",");
+        return Call(name, args);
+    }
 
-		while (tokens.hasNext()) {
-			let t = tokens.next();
-			if (t.data === delimiter) return list;
-			if (separator && counter > 0) {
-				match(t, separator);
-				t = tokens.next();
-			}
-			list.push(read(t, tokens));
-			counter++;
-		}
+    fun collect(
+        tokens: Tokens,
+        read: (Token, Tokens) -> Node,
+        delimiter: String,
+        separator: String? = null
+    ): List<Node> {
+        val list = ArrayList<Node>();
+        var counter = 0;
 
-		throw new Error('end of file');
-	}
+        while (tokens.hasNext()) {
+            var t = tokens.next();
+            if (t.data === delimiter) return list;
+            if (separator != null && counter > 0) {
+                match(t, separator);
+                t = tokens.next();
+            }
+            list.add(read(t, tokens));
+            counter++;
+        }
 
-	function match(token, data) {
-		if (token.data !== data) throw new Error('syntax error', token);
-		return token;
-	}
+        throw Error("end of file");
+    }
 
-	function matchType(token, type) {
-		if (token.type !== type) throw new Error('syntax error', token);
-		return token;
-	}
+    fun match(token: Token, data: String): Token {
+        if (token.data !== data) throw Error("syntax error", token);
+        return token;
+    }
 
-	class Tokens {
+    fun matchType(token: Token, type: Int): Token {
+        if (token.type !== type) throw Error("syntax error", token);
+        return token;
+    }
 
-		constructor(tokenList) {
-			this.tokenList = tokenList;
-			this.index = 0;
-		}
+    class Tokens {
+        var tokenList: List<Token>;
+        var index: Int
 
-		hasNext() {
-			return (this.index < this.tokenList.length);
-		}
+        constructor(tokenList: List<Token>) {
+            this.tokenList = tokenList;
+            this.index = 0;
+        }
 
-		next() {
-			if (!this.hasNext()) throw new Error('end of file');
-			return this.tokenList[this.index++];
-		}
+        fun hasNext(): Boolean {
+            return (this.index < this.tokenList.size);
+        }
 
-	}
+        fun next(): Token {
+            if (!this.hasNext()) throw Error("end of file");
+            return this.tokenList[this.index++];
+        }
 
-	class Error {
+    }
 
-		constructor(message, token) {
-			this.message = message;
-			this.token = token;
-		}
+    class Error : Throwable {
+        var token: Token?
 
-	}
+        constructor(message: String, token: Token? = null) : super(message) {
+            this.token = token;
+        }
 
-	return { parse: (tokens) => parse(tokens) };
+    }
 
-})();
+}
