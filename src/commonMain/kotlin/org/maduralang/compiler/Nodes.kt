@@ -1,71 +1,71 @@
-class Node {
-	constructor(tag) {
-		this.tag = tag;
-	}
+open class Node { var tag: String
+    constructor(tag: String = "") {
+        this.tag = tag;
+    }
 
-	print() {
-		return this.tag;
-	}
+    open fun print(): String {
+        return this.tag;
+    }
 }
 
-class Module extends Node {
-	constructor(defs) {
-		super('module');
-		this.defs = defs;
-	}
+class Module : Node { var defs: List<Node>
+    constructor(defs: List<Node>) : super("module") {
+        this.defs = defs;
+    }
 
-	print() {
-		return `{"defs": ${printList(this.defs)}}`
-	}
+    override fun print(): String {
+        return "{\"defs\": ${printList(this.defs)}}"
+    }
 }
 
-class Function extends Node {
-	constructor(name, params, type, body) {
-		super('fun');
-		this.name = name;
-		this.params = params;
-		this.type = type;
-		this.body = body;
-	}
+class Function : Node { var name: Node; var params: List<Node>; var type: Node?; var body: List<Node>
+    constructor(name: Node, params: List<Node>, type: Node?, body: List<Node>) : super("fun") {
+        this.name = name;
+        this.params = params;
+        this.type = type;
+        this.body = body;
+    }
 
-	print() {
-		return `{"name": "${this.name.print()}", "params": ${printList(this.params)}, "type": "${this.type ? this.type.print() : 'None'}", "body": ${printList(this.body)}}`
-	}
+    override fun print(): String {
+        return "{\"name\": \"${this.name.print()}\", \"params\": ${printList(this.params)}, \"type\": \"${if (this.type != null) this.type!!.print() else "None"}\", \"body\": ${
+            printList(
+                this.body
+            )
+        }}"
+    }
 }
 
-class Parameter extends Node {
-	constructor(name, type) {
-		super();
-		this.name = name;
-		this.type = type;
-	}
+class Parameter : Node { var name: Node; var type: Node
+    constructor(name: Node, type: Node) : super() {
+        this.name = name;
+        this.type = type;
+    }
 
-	print() {
-		return `{"name": "${this.name.print()}", "type": "${this.type.print()}"}`
-	}
+    override fun print(): String {
+        return "{\"name\": \"${this.name.print()}\", \"type\": \"${this.type.print()}\"}"
+    }
 }
 
-class Call extends Node {
-	constructor(name, args) {
-		super();
-		this.name = name;
-		this.args = args;
-	}
+class Call : Node { var name: Node; var args: List<Node>
+    constructor(name: Node, args: List<Node>) : super() {
+        this.name = name;
+        this.args = args;
+    }
 
-	print() {
-		return `{"name": "${this.name.print()}", "args": ${printList(this.args)}}`
-	}
+    override fun print(): String {
+        return "{\"name\": \"${this.name.print()}\", \"args\": ${printList(this.args)}}"
+    }
 }
 
-function printList(list) {
-	let builder = [];
-	builder.push('[');
+fun printList(list: List<Node>): String {
+    var builder = StringBuilder();
+    builder.append("[");
 
-	for (let i = 0; i < list.length; ++i) {
-		if (i > 0) builder.push(', ');
-		builder.push(list[i].print());
-	}
+    for (i in 0..<list.size) {
+        if (i > 0) builder.append(", ");
+        builder.append(list[i].print());
+    }
 
-	builder.push(']');
-	return builder.join('');
+    builder.append("]");
+    return builder.toString();
 }
