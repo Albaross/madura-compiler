@@ -1,5 +1,6 @@
 package org.maduralang.compiler
 
+import org.maduralang.compiler.TokenType.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

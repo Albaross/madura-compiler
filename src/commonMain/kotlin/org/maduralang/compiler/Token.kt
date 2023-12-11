@@ -1,17 +1,10 @@
 package org.maduralang.compiler
 
-const val WHITESPACE = 0
-const val LINEBREAK = 1
-const val NAME = 2
-const val KEYWORD = 3
-const val NUMBER = 4
-const val STRING = 5
-const val SYMBOL = 6
-const val COMMENT = 7
-const val META = 8
-const val INVALID = 9
+enum class TokenType {
+    WHITESPACE, NAME, KEYWORD, NUMBER, STRING, SYMBOL, COMMENT, META, INVALID
+}
 
-data class Token(val type: Int, val data: String) {
+data class Token(val type: TokenType, val data: String) {
 
     override fun toString(): String = data
 }

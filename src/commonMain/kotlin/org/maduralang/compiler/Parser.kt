@@ -1,7 +1,9 @@
 package org.maduralang.compiler
 
+import org.maduralang.compiler.TokenType.*
+
 class Parser(private val tokens: Iterator<Token>) {
-    
+
     private lateinit var look: Token
 
     fun parse(): Node {
@@ -15,7 +17,7 @@ class Parser(private val tokens: Iterator<Token>) {
             move()
             when (look.type) {
                 KEYWORD -> defs.add(readDefinition())
-                LINEBREAK, COMMENT, META -> break
+                COMMENT, META -> break
                 else -> throw Error("syntax error", look)
             }
         }
@@ -51,7 +53,7 @@ class Parser(private val tokens: Iterator<Token>) {
         }
 
         val body = when (look.data) {
-            "{" -> collect(::readStatement, "}", "\n")
+            "{" -> collect(::readStatement, "}")
             "=>" -> listOf(readStatement())
             else -> throw Error("syntax error", look)
         }
@@ -123,7 +125,7 @@ class Parser(private val tokens: Iterator<Token>) {
         return look
     }
 
-    private fun matchType(type: Int): Token {
+    private fun matchType(type: TokenType): Token {
         if (look.type != type) throw Error("syntax error", look)
         return look
     }
