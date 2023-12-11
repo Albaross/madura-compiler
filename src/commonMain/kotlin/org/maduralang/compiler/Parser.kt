@@ -1,3 +1,5 @@
+package org.maduralang.compiler
+
 class Parser() {
 
     fun parse(tokenList: List<Token>): Node {

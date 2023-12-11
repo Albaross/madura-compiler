@@ -1,3 +1,5 @@
+package org.maduralang.compiler
+
 interface Node
 
 data class Module(val defs: List<Node>) : Node {
@@ -9,9 +11,9 @@ data class Module(val defs: List<Node>) : Node {
 
 data class Function(
     val name: Token,
-    val params: List<Node>,
-    val type: Token?,
-    val body: List<Node>
+    val params: List<Node> = emptyList(),
+    val type: Token? = null,
+    val body: List<Node> = emptyList()
 ) : Node {
 
     override fun toString(): String {
@@ -33,7 +35,7 @@ data class Call(val name: Token, val args: List<Node>) : Node {
     }
 }
 
-data class Constant(val token: Token):Node {
+data class Constant(val token: Token) : Node {
 
     override fun toString(): String = token.data
 }

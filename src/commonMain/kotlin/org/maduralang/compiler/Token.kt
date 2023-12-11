@@ -1,3 +1,5 @@
+package org.maduralang.compiler
+
 const val WHITESPACE = 0
 const val LINEBREAK = 1
 const val NAME = 2
