@@ -1,27 +1,32 @@
 interface Node
 
-class Module(var defs: List<Node>) : Node {
+data class Module(val defs: List<Node>) : Node {
 
     override fun toString(): String {
         return "{\"defs\": $defs}"
     }
 }
 
-class Function(var name: Node, var params: List<Node>, var type: Node?, var body: List<Node>) : Node {
+data class Function(
+    val name: Token,
+    val params: List<Node>,
+    val type: Token = Token(NAME, "None"),
+    val body: List<Node>) :
+    Node {
 
     override fun toString(): String {
-        return "{\"name\": \"$name\", \"params\": $params, \"type\": \"${if (type != null) type else "None"}\", \"body\": $body}"
+        return "{\"name\": \"$name\", \"params\": $params, \"type\": \"$type\", \"body\": $body}"
     }
 }
 
-class Parameter(var name: Node, var type: Node) : Node {
+data class Parameter(val name: Token, val type: Token) : Node {
 
     override fun toString(): String {
         return "{\"name\": \"$name\", \"type\": \"$type\"}"
     }
 }
 
-class Call(val name: Node, val args: List<Node>) : Node {
+data class Call(val name: Token, val args: List<Node>) : Node {
 
     override fun toString(): String {
         return "{\"name\": \"$name\", \"args\": $args}"
