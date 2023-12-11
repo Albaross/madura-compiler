@@ -7,7 +7,7 @@ class ParserTest {
 
     @Test
     fun `input is parsed correctly`() {
-        assertEquals(PARSER_OUTPUT, Parser().parse(LEXER_OUTPUT))
+        assertEquals(PARSER_OUTPUT, Parser(LEXER_OUTPUT.iterator()).parse())
     }
 }
 

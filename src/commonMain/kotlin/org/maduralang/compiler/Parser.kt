@@ -1,155 +1,137 @@
 package org.maduralang.compiler
 
-class Parser() {
+class Parser(private val tokens: Iterator<Token>) {
+    
+    private lateinit var look: Token
 
-    fun parse(tokenList: List<Token>): Node {
-        return readModule(Tokens(tokenList));
+    fun parse(): Node {
+        return readModule()
     }
 
-    fun readModule(tokens: Tokens): Module {
-        val defs = ArrayList<Node>();
+    private fun readModule(): Module {
+        val defs = ArrayList<Node>()
 
         while (tokens.hasNext()) {
-            var t = tokens.next();
-            when (t.type) {
-                KEYWORD -> defs.add(readDefinition(t, tokens));
-                LINEBREAK,
-                COMMENT,
-                META -> break;
-                else -> throw Error("syntax error", t);
+            move()
+            when (look.type) {
+                KEYWORD -> defs.add(readDefinition())
+                LINEBREAK, COMMENT, META -> break
+                else -> throw Error("syntax error", look)
             }
         }
 
-        return Module(defs);
+        return Module(defs)
     }
 
-    fun readDefinition(t: Token, tokens: Tokens): Node {
-        when (t.data) {
-            "fun" -> return readFunction(t, tokens);
+    private fun readDefinition(): Node {
+        when (look.data) {
+            "fun" -> return readFunction()
             "var",
             "class",
             "public",
             "private",
-            "protected" -> throw Error("not yet implemented", t);
-            else -> throw Error("syntax arror", t);
+            "protected" -> throw Error("not yet implemented", look)
+
+            else -> throw Error("syntax error", look)
         }
     }
 
-    fun readFunction(token: Token, tokens: Tokens): Function {
-        var name = matchType(tokens.next(), NAME);
-        match(tokens.next(), "(");
-        var params = collect(tokens, ::readParameter, ")", ",");
-        var t = tokens.next();
-        var type: Token? = null;
+    private fun readFunction(): Function {
+        move()
+        val name = matchType(NAME)
+        move()
+        match("(")
+        val params = collect(::readParameter, ")", ",")
+        move()
+        var type: Token? = null
 
-        if (t.data === ":") {
-            type = readType(tokens);
-            t = tokens.next();
+        if (look.data == ":") {
+            type = readType()
+            move()
         }
 
-        var body = emptyList<Node>();
-        when (t.data) {
-            "{" -> body = collect(tokens, ::readStatement, "}", "\n");
-            "=>" -> body = listOf(readStatement(tokens.next(), tokens));
+        val body = when (look.data) {
+            "{" -> collect(::readStatement, "}", "\n")
+            "=>" -> listOf(readStatement())
+            else -> throw Error("syntax error", look)
         }
 
-        return Function(name, params, type, body);
+        return Function(name, params, type, body)
     }
 
-    fun readParameter(t: Token, tokens: Tokens): Parameter {
-        var name = matchType(t, NAME);
-        match(tokens.next(), ":");
-        var type = readType(tokens);
-        return Parameter(name, type);
+    private fun readParameter(): Parameter {
+        val name = matchType(NAME)
+        move()
+        match(":")
+        val type = readType()
+        return Parameter(name, type)
     }
 
-    fun readType(tokens: Tokens): Token {
-        return matchType(tokens.next(), NAME);
+    private fun readType(): Token {
+        move()
+        return matchType(NAME)
     }
 
-    fun readStatement(t: Token, tokens: Tokens): Node {
-        if (t.type === NAME) {
-            return readCall(t, tokens);
+    private fun readStatement(): Node {
+        move()
+        if (look.type == NAME) {
+            return readCall()
         }
-        throw Error("syntax error", t);
+        throw Error("syntax error", look)
     }
 
-    fun readExpression(t: Token, tokens: Tokens): Node {
-        when (t.type) {
-            NUMBER,
-            STRING -> return Constant(t);
-            NAME -> return readCall(t, tokens);
+    private fun readExpression(): Node {
+        return when (look.type) {
+            NUMBER, STRING -> Constant(look)
+            NAME -> readCall()
+            else -> throw Error("syntax error", look)
         }
-        throw Error("systax error", t);
     }
 
-    fun readCall(t: Token, tokens: Tokens): Call {
-        var name = t;
-        match(tokens.next(), "(");
-        var args = collect(tokens, ::readExpression, ")", ",");
-        return Call(name, args);
+    private fun readCall(): Call {
+        val name = look
+        move()
+        match("(")
+        val args = collect(::readExpression, ")", ",")
+        return Call(name, args)
     }
 
-    fun collect(
-        tokens: Tokens,
-        read: (Token, Tokens) -> Node,
+    private fun collect(
+        read: () -> Node,
         delimiter: String,
         separator: String? = null
     ): List<Node> {
-        val list = ArrayList<Node>();
-        var counter = 0;
+        val list = ArrayList<Node>()
+        var counter = 0
 
-        while (tokens.hasNext()) {
-            var t = tokens.next();
-            if (t.data === delimiter) return list;
+        move()
+        while (look.data != delimiter) {
             if (separator != null && counter > 0) {
-                match(t, separator);
-                t = tokens.next();
+                match(separator)
+                move()
             }
-            list.add(read(t, tokens));
-            counter++;
+            list.add(read())
+            move()
+            counter++
         }
 
-        throw Error("end of file");
+        return list
     }
 
-    fun match(token: Token, data: String): Token {
-        if (token.data !== data) throw Error("syntax error", token);
-        return token;
+    private fun match(data: String): Token {
+        if (look.data != data) throw Error("syntax error", look)
+        return look
     }
 
-    fun matchType(token: Token, type: Int): Token {
-        if (token.type !== type) throw Error("syntax error", token);
-        return token;
+    private fun matchType(type: Int): Token {
+        if (look.type != type) throw Error("syntax error", look)
+        return look
     }
 
-    class Tokens {
-        var tokenList: List<Token>;
-        var index: Int
-
-        constructor(tokenList: List<Token>) {
-            this.tokenList = tokenList;
-            this.index = 0;
-        }
-
-        fun hasNext(): Boolean {
-            return (this.index < this.tokenList.size);
-        }
-
-        fun next(): Token {
-            if (!this.hasNext()) throw Error("end of file");
-            return this.tokenList[this.index++];
-        }
-
+    private fun move() {
+        look = tokens.next()
     }
 
-    class Error : Throwable {
-        var token: Token?
-
-        constructor(message: String, token: Token? = null) : super(message) {
-            this.token = token;
-        }
-
-    }
+    class Error(message: String, val token: Token? = null) : Throwable(message)
 
 }
