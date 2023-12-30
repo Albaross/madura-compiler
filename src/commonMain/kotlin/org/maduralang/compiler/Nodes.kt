@@ -1,41 +1,36 @@
 package org.maduralang.compiler
 
+import org.maduralang.compiler.tokens.Token
+
 interface Node
 
-data class Module(val defs: List<Node>) : Node {
+interface Statement : Node
 
-    override fun toString(): String {
-        return "{\"defs\": $defs}"
-    }
-}
+interface Expression : Node
+
+interface Definition : Node
+
+data class Module(val defs: List<Definition>) : Node
 
 data class Function(
     val name: Token,
-    val params: List<Node> = emptyList(),
+    val params: List<Parameter> = emptyList(),
     val type: Token? = null,
-    val body: List<Node> = emptyList()
-) : Node {
+    val body: List<Statement> = emptyList()
+) : Definition
 
-    override fun toString(): String {
-        return "{\"name\": \"$name\", \"params\": $params, \"type\": \"${type ?: "None"}\", \"body\": $body}"
-    }
-}
+data class Parameter(val name: Token, val type: Token) : Node
 
-data class Parameter(val name: Token, val type: Token) : Node {
+data class Call(val name: Token, val args: List<Expression>) : Statement, Expression
 
-    override fun toString(): String {
-        return "{\"name\": \"$name\", \"type\": \"$type\"}"
-    }
-}
+data class Constant(val token: Token) : Expression
 
-data class Call(val name: Token, val args: List<Node>) : Node {
+data class Assign(val variable: String, val expr: Expression) : Statement
 
-    override fun toString(): String {
-        return "{\"name\": \"$name\", \"args\": $args}"
-    }
-}
+data class While(val cond: Expression, val body: List<Statement>) : Statement
 
-data class Constant(val token: Token) : Node {
+data class If(val cond: Expression, val thenBody: List<Statement>, val elseBody: List<Statement>) : Statement
 
-    override fun toString(): String = token.data
-}
+data class Variable(val name: String) : Expression
+
+data class BinaryOperation(val op: String, val left: Expression, val right: Expression) : Expression

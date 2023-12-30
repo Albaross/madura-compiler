@@ -1,6 +1,8 @@
 package org.maduralang.compiler
 
-import org.maduralang.compiler.TokenType.*
+import org.maduralang.compiler.tokens.Token
+import org.maduralang.compiler.tokens.TokenType
+import org.maduralang.compiler.tokens.TokenType.*
 
 class Parser(private val tokens: Iterator<Token>) {
 
@@ -11,7 +13,7 @@ class Parser(private val tokens: Iterator<Token>) {
     }
 
     private fun readModule(): Module {
-        val defs = ArrayList<Node>()
+        val defs = ArrayList<Definition>()
 
         while (tokens.hasNext()) {
             move()
@@ -25,7 +27,7 @@ class Parser(private val tokens: Iterator<Token>) {
         return Module(defs)
     }
 
-    private fun readDefinition(): Node {
+    private fun readDefinition(): Definition {
         when (look.data) {
             "fun" -> return readFunction()
             "var",
@@ -74,7 +76,7 @@ class Parser(private val tokens: Iterator<Token>) {
         return matchType(NAME)
     }
 
-    private fun readStatement(): Node {
+    private fun readStatement(): Statement {
         move()
         if (look.type == NAME) {
             return readCall()
@@ -82,9 +84,9 @@ class Parser(private val tokens: Iterator<Token>) {
         throw Error("syntax error", look)
     }
 
-    private fun readExpression(): Node {
+    private fun readExpression(): Expression {
         return when (look.type) {
-            NUMBER, STRING -> Constant(look)
+            NUMBER, TEXT -> Constant(look)
             NAME -> readCall()
             else -> throw Error("syntax error", look)
         }
@@ -98,12 +100,12 @@ class Parser(private val tokens: Iterator<Token>) {
         return Call(name, args)
     }
 
-    private fun collect(
-        read: () -> Node,
+    private fun <T: Node> collect(
+        read: () -> T,
         delimiter: String,
         separator: String? = null
-    ): List<Node> {
-        val list = ArrayList<Node>()
+    ): List<T> {
+        val list = ArrayList<T>()
         var counter = 0
 
         move()
