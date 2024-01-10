@@ -12,14 +12,17 @@
     mein Labor um neue Ideen auszuprobieren. Madura ist auch der Name einer winzigen Insel in der Nähe von Java, was die
     ursprüngliche Intention recht gut widerspiegelt: Zunächst war Madura nicht viel mehr als eine Art Java-Dialekt, mein
     Versuch, ein "besseres" Java zu konzipieren.
-    Der erste Entwurf stammt aus einer Zeit, in der Java 8 die neueste Version war, als ich mit Spring Boot
-    und Project Lombok bereits einigermaßen vertraut war und kurz bevor ich Kotlin kennenlernte. Ich erinnere mich nicht
+    Der erste Entwurf stammt aus einer Zeit, in der Java 8 die neueste Version war, als ich mit Spring Boot und Project
+    Lombok bereits einigermaßen vertraut war und kurz bevor ich Kotlin kennenlernte. Ich erinnere mich nicht
     mehr an jede geplante Anpassung, aber einige der wichtigsten Änderungen beinhalten:
+</p>
 <ul>
     <li>Compiler-Hooks können als Teil des Projekts direkt im Quellcode implementiert werden.</li>
     <li>Um eine Klasse abstrakt zu machen, werden die Bodies einiger ihrer Methoden weggelassen.</li>
     <li>Klassen und Methoden sind standardmäßig <em>public</em>, während Attribute <em>private</em> sind.</li>
-    <li>Das Keyword <em>shared</em> wird anstelle von <em>static</em> und der Typ <em>none</em> anstelle von <em>void</em> verwendet.</li>
+    <li>Das Keyword <em>shared</em> wird anstelle von <em>static</em> und der Typ <em>none</em> anstelle von
+        <em>void</em> verwendet.
+    </li>
     <li>Methodenparameter sind immer <em>final</em>.</li>
     <li>Checked Exceptions werden entfernt.</li>
     <li>Optionale Array-Parameter in der <em>main</em>-Methode und eine kürzere <em>println</em>-Methode.</li>
@@ -29,16 +32,15 @@ A short program might look like this:
 <code>
     @Data
     class Person {
-        final String name;
+    final String name;
     }
 
     class Main {
-        shared none main() {
-            final Person person = new Person("Tom");
-            println("Hello " + person.getName());
-        }
+    shared none main() {
+    final Person person = new Person("Tom");
+    println("Hello " + person.getName());
+    }
     }
 </code>
-</p>
 </body>
 </html>

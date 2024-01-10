@@ -8,36 +8,42 @@
 <body>
 <h1>Madura - why yet another programming language?</h1>
 <p>
-    Madura is the name of my pet programming language, my playground for experimenting with new technologies, my laboratory
-    to try out new ideas. Madura is also the name of a tiny island near Java, which reflects the initial intention quite
-    well: At first, Madura wasn't much more than a kind of Java dialect, my attempt to design a "better" Java.
-    The first draft came from a time when Java 8 was the latest version, when I was already somewhat familiar with Spring Boot
-    and Project Lombok and just before I got to know Kotlin. I do not recall every adjustment I had planned, but some of
-    the major changes include:
+    Madura is the name of my pet programming language, my playground for experimenting with new technologies, my
+    laboratory to try out new ideas. Madura is also the name of a tiny island near Java, which reflects the initial
+    intention quite well: At first, Madura wasn't much more than a kind of Java dialect, my attempt to design a "better"
+    Java.
+    The first draft came from a time when Java 8 was the latest version, when I was already somewhat familiar with
+    Spring Boot and Project Lombok and just before I got to know Kotlin. I do not recall every adjustment I had planned,
+    but some of the major changes include:
+</p>
 <ul>
     <li>Compiler hooks can be implemented directly in the source code as part of the project.</li>
     <li>To make a class <em>abstract</em>, the bodies of some its method's bodies are omitted.</li>
     <li>Classes and methods are <em>public</em> by default, while attributes are <em>private</em>.</li>
-    <li>The keyword <em>shared</em> is used instead of <em>static</em> and the type <em>none</em> instead of <em>void</em>.</li>
+    <li>The keyword <em>shared</em> is used instead of <em>static</em> and the type <em>none</em> instead of
+        <em>void</em>.
+    </li>
     <li>Method parameters are always <em>final</em>.</li>
     <li>Checked exceptions are removed.</li>
     <li>An optional array parameter in <em>main</em> method and a shorter <em>println</em> method.</li>
 </ul>
+<p>
+    Since
+</p>
 
 A short program might look like this:
 <code>
     @Data
     class Person {
-        final String name;
+    final String name;
     }
 
     class Main {
-        shared none main() {
-            final Person person = new Person("Tom");
-            println("Hello " + person.getName());
-        }
+    shared none main() {
+    final Person person = new Person("Tom");
+    println("Hello " + person.getName());
+    }
     }
 </code>
-</p>
 </body>
 </html>
